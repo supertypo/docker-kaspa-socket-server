@@ -4,10 +4,12 @@
 FROM python:3.10-slim AS builder
 
 ARG REPO_DIR
+ARG VERSION
 
 ENV APP_USER=api \
   APP_UID=55747 \
-  APP_DIR=/app
+  APP_DIR=/app \
+  VERSION=$VERSION
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
@@ -30,13 +32,16 @@ RUN pipenv install --deploy -v
 RUN rm -r .cache/
 
 ##
-# kaspa-db-filler image
+# kaspa-socket-server image
 ##
 FROM python:3.10-slim
 
+ARG VERSION
+
 ENV APP_USER=api \
   APP_UID=55747 \
-  APP_DIR=/app
+  APP_DIR=/app \
+  VERSION=$VERSION
 
 ENV KASPAD_HOST_1=kaspad:16110 \
   SQL_URI=postgresql+asyncpg://postgres:password@postgresql:5432/postgres

@@ -24,6 +24,11 @@ echo "===================================================="
 
 tag=$(cd "$BUILD_DIR/$REPO_DIR" && git log -n1 --format="%cs.%h")
 
+version=$TAG
+if [ "$version" = "main" ]; then
+  version=$tag
+fi
+
 docker=docker
 id -nG $USER | grep -qw docker || docker="sudo $docker"
 
@@ -34,6 +39,7 @@ plain_build() {
   echo "===================================================="
   $docker build --pull \
     --build-arg REPO_DIR="$REPO_DIR" \
+    --build-arg VERSION=$version \
     --tag $DOCKER_REPO:$tag "$BUILD_DIR"
 
   $docker tag $DOCKER_REPO:$tag $DOCKER_REPO:multi-arch
@@ -59,6 +65,7 @@ multi_arch_build() {
   fi
   $docker buildx build --pull --platform=$(echo $ARCHES | sed 's/ /,/g') $dockerRepoArgs \
     --build-arg REPO_DIR="$REPO_DIR" \
+    --build-arg VERSION=$version \
     --tag $DOCKER_REPO:$tag \
     --tag $DOCKER_REPO:multi-arch "$BUILD_DIR"
   echo "===================================================="
